@@ -1,0 +1,86 @@
+puzzle_admin_media_file_list:
+    path:     /file/list
+    defaults: { _controller: MediaBundle:Admin:listFiles }
+
+puzzle_admin_media_file_browse:
+    path:     /file/browse
+    defaults: { _controller: MediaBundle:Admin:browseFiles }
+
+puzzle_admin_media_file_upload:
+    path:     /file/upload
+    defaults: { _controller: MediaBundle:Admin:uploadFile }
+
+puzzle_admin_media_file_add:
+    path:     /file/add
+    defaults: { _controller: MediaBundle:Admin:addFile }
+
+puzzle_admin_media_file_show:
+    path:     /file/{id}/show
+    defaults: { _controller: MediaBundle:Admin:showFile }
+
+puzzle_admin_media_file_delete:
+    path:     /file/{id}/delete
+    defaults: { _controller: MediaBundle:Admin:deleteFile }
+
+# Folder
+puzzle_admin_media_folder_list:
+    path:     /folder/list
+    defaults: { _controller: MediaBundle:Admin:listFolders }
+
+puzzle_admin_media_folder_browse:
+    path:     /folder/browse
+    defaults: { _controller: MediaBundle:Admin:browseFolders }
+
+puzzle_admin_media_folder_create:
+    path:     /folder/create
+    defaults: { _controller: MediaBundle:Admin:createFolder }
+
+puzzle_admin_media_folder_show:
+    path:     /folder/{id}/show
+    defaults: { _controller: MediaBundle:Admin:showFolder }
+
+puzzle_admin_media_folder_compress:
+    path:     /folder/{id}/compress
+    defaults: { _controller: MediaBundle:Admin:compressFolder }
+
+puzzle_admin_media_folder_update:
+    path:     /folder/{id}/update
+    defaults: { _controller: MediaBundle:Admin:updateFolder }
+
+puzzle_admin_media_folder_update_files_add:
+    path:     /{id}/update/files/add
+    defaults: { _controller: MediaBundle:Admin:updateFolderByAddingFiles }
+
+puzzle_admin_media_folder_update_files_remove:
+    path:     /folder/{id}/update/files/remove
+    defaults: { _controller: MediaBundle:Admin:updateFolderByRemovingFiles }
+
+puzzle_admin_media_folder_update_file_remove:
+    path:     /folder/{id}/update/file/{fileId}/remove
+    defaults: { _controller: MediaBundle:Admin:updateFolderByRemovingFile }
+
+puzzle_admin_media_folder_delete:
+    path:     /folder/{id}/delete
+    defaults: { _controller: MediaBundle:Admin:deleteFolder }
+
+
+# Comment
+puzzle_admin_media_comment_list:
+    path:     /comment/list
+    defaults: { _controller: 'MediaBundle:Admin:listComments' }
+
+puzzle_admin_media_comment_update:
+    path:     /comment/{id}/update
+    defaults: { _controller: 'MediaBundle:Admin:updateComment' }
+    
+puzzle_admin_media_comment_approve:
+    path:     /comment/{id}/approve
+    defaults: { _controller: 'MediaBundle:Admin:approveComment' }
+    
+puzzle_admin_media_comment_disapprove:
+    path:     /comment/{id}/disapprove
+    defaults: { _controller: 'MediaBundle:Admin:disapproveComment' }
+
+puzzle_admin_media_comment_delete:
+    path:     /comment/{id}/delete
+    defaults: { _controller: 'MediaBundle:Admin:deleteComment' }
