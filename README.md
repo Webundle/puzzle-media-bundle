@@ -24,6 +24,7 @@ class AppKernel extends Kernel
     {
         $bundles = array(
             // ...
+            new Liip\ImagineBundle\LiipImagineBundle(),
             new Puzzle\MediaBundle\MediaBundle(),
         );
 
@@ -39,17 +40,17 @@ Configure security by adding it in the `app/config/security.yml` file of your pr
 
 ```yaml
 security:
-   	...
+	...
     role_hierarchy:
         ...
-        # User
+        # Media
         ROLE_MEDIA: ROLE_ADMIN
         ROLE_SUPER_ADMIN: [..,ROLE_MEDIA]
         
 	...
     access_control:
         ...
-        # User
+        # Media
         - {path: ^%admin_prefix%learning, host: "%admin_host%", roles: ROLE_MEDIA }
 
 ```
@@ -60,9 +61,14 @@ Register default routes by adding it in the `app/config/routing.yml` file of you
 
 ```yaml
 ....
-user:
+media:
     resource: "@MediaBundle/Resources/config/routing.yml"
     prefix:   /
+
+
+_liip_imagine:
+    resource: "@LiipImagineBundle/Resources/config/routing.yaml"
+
 ```
 See all learning routes by typing: `php bin/console debug:router | grep media`
 
@@ -72,7 +78,8 @@ See all learning routes by typing: `php bin/console debug:router | grep media`
 Register default routes by adding it in the `app/config/parameters.yml` file of your project:
 
 ```yaml
-....
+parameters:
+	....
 	media_base_dir: '%kernel.root_dir%/../web'
 
 ```
@@ -83,56 +90,17 @@ Configure admin bundle by adding it in the `app/config/config.yml` file of your 
 ```yaml
 # Liip
 liip_imagine :
-    # configure resolvers
     resolvers :
-        # setup the default resolver
         default :
-            # use the default web path
             web_path : ~
-    # your filter sets are defined here
     filter_sets :
-        # use the default cache configuration
         cache : ~
-        # the name of the "filter set"
-        logo_thumb :
-            # adjust the image quality to 75%
-            quality : 100
-            # list of transformations to apply (the "filters")
-            filters :
-                # create a thumbnail: set size to 120x90 and use the "outbound" mode
-                # to crop the image when the size ratio of the input differs
-                thumbnail  : { size : [50, 50], mode : outbound }
-
-        # the name of the "filter set"
-        product_small :
-            # adjust the image quality to 75%
-            quality : 100
-            # list of transformations to apply (the "filters")
-            filters :
-                # create a thumbnail: set size to 120x90 and use the "outbound" mode
-                # to crop the image when the size ratio of the input differs
-                thumbnail  : { size : [400, 400], mode : outbound }
-
-        # the name of the "filter set"
-        product_thumb :
-            # adjust the image quality to 75%
-            quality : 100
-            # list of transformations to apply (the "filters")
-            filters :
-                # create a thumbnail: set size to 120x90 and use the "outbound" mode
-                # to crop the image when the size ratio of the input differs
-                thumbnail  : { size : [95, 60], mode : outbound }
-
-        # the name of the "filter set"
         thumb :
-            # adjust the image quality to 75%
             quality : 100
-            # list of transformations to apply (the "filters")
             filters :
-                # create a thumbnail: set size to 120x90 and use the "outbound" mode
-                # to crop the image when the size ratio of the input differs
                 thumbnail  : { size : [95, 60], mode : outbound }
 
+# Admin
 admin:
     ...
     modules_available: '..,media'
@@ -147,14 +115,14 @@ admin:
                 attr:
                     class: 'fa fa-cloud'
                 parent: ~
-                media_roles: ['ROLE_MEDIA']
+                user_roles: ['ROLE_MEDIA']
             media_file:
                 label: 'media.file.navigation'
                 description: 'media.file.description'
                 translation_domain: 'media'
                 path: 'puzzle_admin_media_file_list'
                 parent: media
-                media_roles: ['ROLE_MEDIA']
+                user_roles: ['ROLE_MEDIA']
             media_folder:
                 label: 'media.folder.navigation'
                 description: 'media.folder.description'
@@ -162,6 +130,6 @@ admin:
                 path: 'puzzle_admin_media_folder_list'
                 sub_paths: ['puzzle_admin_media_folder_create', 'puzzle_admin_media_folder_update', 'puzzle_admin_media_folder_show']
                 parent: media
-                media_roles: ['ROLE_MEDIA']
+                user_roles: ['ROLE_MEDIA']
 
 ```

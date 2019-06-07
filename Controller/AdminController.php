@@ -301,6 +301,10 @@ class AdminController extends Controller
             $file = $em->getRepository(File::class)->findOneBy(['path' => $id]);
         }
         
+        $this->get('event_dispatcher')->dispatch(MediaEvents::DELETING_FILE, new FileEvent([
+            'absolutePath' => $file->getAbsolutePath()
+        ]));
+        
         $message = $this->get('translator')->trans('media.file.delete.success', ['%fileName%' => $file->getName()], 'media');
         
         $em = $this->getDoctrine()->getManager();
@@ -629,7 +633,7 @@ class AdminController extends Controller
         
         $message = $this->get('translator')->trans('success.delete', ['%item%' => $file->getId()], 'messages');
         
-        $this->get('event_dispatcher')->dispatch(MediaEvents::REMOVE_FILE, new FileEvent([
+        $this->get('event_dispatcher')->dispatch(MediaEvents::DELETING_FILE, new FileEvent([
             'absolutePath' => $file->getAbsolutePath()
         ]));
         
@@ -669,7 +673,7 @@ class AdminController extends Controller
         $em = $this->getDoctrine()->getManager();
         $em->remove($folder);
         
-        $this->get('event_dispatcher')->dispatch(MediaEvents::REMOVE_FOLDER, new FolderEvent($folder));
+        $this->get('event_dispatcher')->dispatch(MediaEvents::DELETING_FOLDER, new FolderEvent($folder));
         $em->flush();
         
         $this->addFlash('success', $message);

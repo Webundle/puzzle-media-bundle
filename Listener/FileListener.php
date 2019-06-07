@@ -82,7 +82,7 @@ class FileListener
 	 *
 	 * @param FileEvent $event
 	 */
-	public function onRemove(FileEvent $event) {
+	public function onDeleting(FileEvent $event) {
 	    $data = $event->getData();
 	    if (file_exists($data['absolutePath']) === true) {
 	        unlink($data['absolutePath']);

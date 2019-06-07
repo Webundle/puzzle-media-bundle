@@ -18,7 +18,7 @@ services:
             - { name: doctrine.event_listener, event: "postLoad", method: onPostLoad }
             - { name: kernel.event_listener, event: "media.rename_file", method: onRename }
             - { name: kernel.event_listener, event: "media.copy_file", method: onCopy }
-            - { name: kernel.event_listener, event: "media.remove_file", method: onRemove }
+            - { name: kernel.event_listener, event: "media.deleting_file", method: onDeleting }
 
     media.folder_listener:
         class: Puzzle\MediaBundle\Listener\FolderListener
@@ -28,7 +28,7 @@ services:
             - { name: doctrine.event_listener, event: "postLoad", method: onPostLoad }
             - { name: kernel.event_listener, event: "media.create_folder", method: onCreate }
             - { name: kernel.event_listener, event: "media.rename_folder", method: onUpdate }
-            - { name: kernel.event_listener, event: "media.remove_folder", method: onRemove }
+            - { name: kernel.event_listener, event: "media.deleting_folder", method: onDeleting }
             - { name: kernel.event_listener, event: "media.add_files_to_folder", method: onAddFiles } 
             - { name: kernel.event_listener, event: "media.remove_files_to_folder", method: onRemoveFiles }
     

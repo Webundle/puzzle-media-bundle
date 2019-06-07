@@ -102,11 +102,11 @@ class FolderListener
 	}
 	
 	/**
-	 * Remove folder on disk
+	 * Deleting folder on disk
 	 *
 	 * @param FolderEvent $event
 	 */
-	public function onRemove(FolderEvent $event)
+	public function onDeleting(FolderEvent $event)
 	{
 	    $folder = $event->getFolder();
 	    $folder->setBaseDir($this->baseDir);
