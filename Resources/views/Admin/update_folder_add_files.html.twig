@@ -1,0 +1,39 @@
+{% trans_default_domain 'media' %}
+
+<div class="uk-modal-dialog">
+    <div class="uk-modal-body uk-margin-top">
+        <div class="uk-width-1-1">
+            <form class="uk-form-stacked" action="{{ url('puzzle_admin_media_folder_update_files_add', {'id': folder.id}) }}" method="POST">
+                <div class="uk-form-row">     
+                    <div id="file_upload_drop_file" class="uk-file-upload">
+                        <p class="uk-text">{{ 'media.file.create.drag_and_drop'|trans }}</p>
+                        <p class="uk-text-muted uk-text-small uk-margin-small-bottom">{{ 'media.file.create.or'|trans }}</p>
+                        <a class="uk-form-file md-btn md-btn-flat md-btn-flat-primary" id="file_upload_label_file">
+                            {{ 'media.file.create.choose'|trans }}
+                            <input id="file_upload_select_file" type="file" multiple>
+                        </a>
+
+                        <input type="hidden" id="file_filters_file" value="{{ folder.allowedExtensions|join('|')|default("*") }}">
+                        <input type="hidden" id="file_upload_context_file" value="{% if folder.parent is not empty %}{{ folder.id }}{% else %}media{% endif %}">
+                        <input type="hidden" name="files_to_add" id="files_to_add_file" value="">
+                    </div>
+                    <div id="file_upload_progressbar_file" class="uk-progress uk-hidden">
+                        <div class="uk-progress-bar" style="width:0" id="progress_bar_file">0%</div>
+                    </div>
+                    <input type="hidden" id="refresh-auto" value="1">
+                    <input type="hidden" id="refresh-url" value="{{ url('puzzle_admin_media_folder_show', { 'id': folder.id }) }}">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% javascripts
+    'bundles/admin/js/common.js'
+    'bundles/admin/js/uikit_custom.js'
+    'bundles/media/js/upload.js'
+    'bundles/media/js/admin.js'
+    output="compiled/js/puzzle_admin_media_folder_update_files_add.min.js" 
+%}
+    <script src="{{ asset_url }}"></script>
+{% endjavascripts %}

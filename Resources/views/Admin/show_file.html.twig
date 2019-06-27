@@ -1,0 +1,148 @@
+{% trans_default_domain 'media' %}
+
+<div class="uk-modal-dialog">
+    <div class="uk-modal-body">
+        <div class="uk-grid" data-uk-grid-margin>
+            <div class="uk-width-1-1">
+                <ul class="uk-tab" data-uk-tab="{connect:'#tabs_1'}">
+                    <li class="uk-active"><a href="#">{{ 'media.file.show.basic'|trans }}</a></li>
+                    <li><a href="#">{{ 'media.file.show.more'|trans }}</a></li>
+                    <li><a href="#">{{ 'media.file.show.visual'|trans }}</a></li>
+                </ul>
+                
+                <ul id="tabs_1" class="uk-switcher uk-margin">
+                    <li class="uk-active">
+                        <div class="uk-width-1-1">
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.name'|trans }}</label> :
+                                {{ file.displayName|default(file.name) }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.caption'|trans }}</label> :
+                                {{ file.caption }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.extension'|trans }}</label> :
+                                {{ file.extension }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.size'|trans }}</label> :
+                                {{ file.sizeConvert }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.path'|trans }}</label> :
+                                <a href="{{ file.path }}">{{ file.path }}</a>
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.created_at'|trans }}</label> :
+                                <span>{{ date_time_ago(file.createdAt) }}</span>
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.updated_at'|trans }}</label> :
+                                <span>{{ date_time_ago(file.updatedAt) }}</span>
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.owner'|trans }}</label> :
+                                <span>{{ file.createdBy }}</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        {% if type == 'video' %}
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.type.title'|trans }}</label> :
+                                {{ 'media.file.show.type.video'|trans }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.video.show.duration'|trans }}</label> :
+                                {{ metadata.duration }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.video.show.country'|trans }}</label> :
+                                {{ metadata.country }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.video.show.authors'|trans }}</label> :
+                                {{ metadata.authors }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.video.show.actors'|trans }}</label> :
+                                {{ metadata.actors }}
+                            </div>
+                        {% elseif type == 'audio' %}
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.type.title'|trans }}</label> :
+                                {{ 'media.file.show.type.audio'|trans }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.audio.show.author'|trans }}</label> :
+                                {{ metadata.author }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.audio.show.album'|trans }}</label> :
+                                {{ metadata.album }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.audio.show.artists'|trans }}</label> :
+                                {{ metadata.artists }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.audio.show.compositor'|trans }}</label> :
+                                {{ metadata.compositor }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.audio.show.gender'|trans }}</label> :
+                                {{ metadata.gender }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.audio.show.year'|trans }}</label> :
+                                {{ metadata.year }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.audio.show.track_number'|trans }}</label> :
+                                {{ metadata.trackNumber }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.audio.show.track_total'|trans }}</label> :
+                                {{ metadata.trackTotal }}
+                            </div>
+                        {% elseif type == 'picture' %}
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.file.show.type.title'|trans }}</label> :
+                                {{ 'media.file.show.type.picture'|trans }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.picture.show.width'|trans }}</label> :
+                                {{ metadata.width }}
+                            </div>
+                            <div class="uk-margin-small-bottom">
+                                <label class="uk-text-bold">{{ 'media.picture.show.height'|trans }}</label> :
+                                {{ metadata.height }}
+                            </div>
+                        {% endif %}
+                    </li>
+                    <li>
+                        {% if type == 'picture' %}
+                            <img src="{{ file.path }}" id="item_{{ file.id }}"> 
+                        {% elseif type == 'audio' %}
+                            <audio src="{{ file.path }}" controls id="item_{{ file.id }}" style="width:100%"></audio>
+                        {% elseif type == 'video' %}
+                            <video src="{{ file.path }}" style="width:100%" controls id="item_{{ file.id }}"></video>
+                        {% else %}
+                            <embed src="{{ file.path }}" width="100%" controls id="item_{{ file.id }}" /></embed>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% javascripts
+    'bundles/admin/js/common.js'
+    'bundles/admin/js/uikit_custom.js'
+    output="compiled/js/puzzle_admin_media_file_show.min.js" 
+%}
+    <script src="{{ asset_url }}"></script>
+{% endjavascripts %}
+

@@ -1,0 +1,199 @@
+{% trans_default_domain 'media' %}
+
+{% extends 'MediaBundle:Admin:layout.html.twig' %}
+
+{% set pageTitle = 'media.file.list.'~type|default('file') %}
+
+{% block title %} {{ parent() }} - {{ pageTitle|trans|capitalize }} {% endblock %}
+
+{% block formsearchplaceholder %}{{ 'media.file.list.search'|trans }} {{ pageTitle|trans|lower }} ...{% endblock %}
+
+{% block headingactions %}
+<div class="heading_actions">
+    <div class="md-card-head-menu" data-uk-dropdown="{pos:'bottom-right'}">
+        <a class="uk-text-bold" href="#" data-uk-modal="{ center:true }">
+            {{ 'media.file.list.import'|trans|upper }}
+            {# <i class="fa fa-ellipsis-v"></i> #}
+            <i class="fa fa-cloud-upload"></i>
+        </a>
+        <div class="uk-dropdown">
+            <ul class="uk-nav">
+                <li>
+                    <a href="{{ url('puzzle_admin_media_file_add') }}" class="show-modal">
+                        {{ 'media.file.list.add_file'|trans }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('puzzle_admin_media_file_add_multiple') }}" class="show-modal">
+                        {{ 'media.file.list.add_items'|trans }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block breadcrumbmodule %}
+    {{ parent() }}
+    <em>{{ pageTitle|trans|capitalize }}</em>
+{% endblock %}
+
+{% block content %}
+    <div id="page_content_inner">
+        <div class="uk-width-1-1 uk-text-right uk-margin-bottom">
+            <div class="uk-button-dropdown" data-uk-dropdown>
+                <button class="md-btn">
+                    {% if type is defined and type is not empty %}
+                        {% set filterTitle = "media.file.list.filter."~type %}
+                        {{ filterTitle|trans }}
+                    {% else %}
+                        {{ 'media.file.list.filter.title'|trans }}
+                    {% endif %}
+                    <i class="material-icons">&#xE313;</i>
+                </button>
+                <div class="uk-dropdown uk-dropdown-small uk-text-left">
+                    <ul class="uk-nav uk-nav-dropdown">
+                        {% if type is defined and type is not empty %}
+                            <li>
+                                <a href="{{ url('puzzle_admin_media_file_list') }}">
+                                    <i class="fa fa-file uk-margin-right"></i>
+                                    {{ 'media.file.list.filter.all'|trans }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li>
+                            <a href="{{ url('puzzle_admin_media_file_list', {'type': 'audio' }) }}">
+                                <i class="fa fa-file-audio-o uk-margin-right"></i>
+                                {{ 'media.file.list.filter.audio'|trans }}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('puzzle_admin_media_file_list', {'type': 'picture' }) }}">
+                                <i class="fa fa-photo uk-margin-right"></i>
+                                {{ 'media.file.list.filter.picture'|trans }}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('puzzle_admin_media_file_list', {'type': 'video' }) }}">
+                                <i class="fa fa-video-camera uk-margin-right"></i>
+                                {{ 'media.file.list.filter.video'|trans }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <table id="dt_individual_search" class="uk-table uk-table-hover" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th class="no-sort">
+                                {% if items is not empty %}
+                                    <div class="toggle-action uk-hidden">
+                                        <select class="grouped-actions">
+                                            <option value="">{{ 'media.file.list.grouped_actions'|trans }}</option>
+                                            <option value="copy">{{ 'media.file.list.copy'|trans }}</option>
+                                            <option value="move">{{ 'media.file.list.move'|trans }}</option>
+                                            <option value="delete">{{ 'media.file.list.delete'|trans }}</option>
+                                        </select>
+                                        <input type="hidden" value="{{ items|length|default('0') }}" id="toggle-items-count">
+                                        <input type="hidden" value="0" id="toggle-items-checked-count">
+                                    </div>
+                                {% endif %}
+                            </th>
+                            <th>{{ 'media.file.list.name'|trans }}</th>
+                            <th>{{ 'media.file.list.date'|trans }}</th>
+                            <th class="uk-text-right no-sort">{{ 'media.file.list.actions'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            {% set file = item.file|default(item) %}
+                            <tr class="toggleable" id="item-{{ file.id }}">
+                                <td>
+                                    <a class="uk-text-muted uk-text-small uk-text-left toggleable-btn-select" href="#">
+                                        <i class="material-icons toggle-icon toggle-item" id="toggle-item-{{ file.id }}">&#xE835;</i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="uk-text-truncate">
+                                        <a href="{{ url('puzzle_admin_media_file_show', {'id': file.id}) }}" class="show-modal">
+                                            <i class="fa fa-file fa-2x uk-margin-right"></i>
+                                            <span style="vertical-align: top;">{{ file.displayName|default(file.name) }}</span>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>{{ date_time_ago(file.createdAt) }}</td>
+                                <td class="uk-text-right">
+                                    <div class="uk-button-dropdown" data-uk-dropdown="{pos:'bottom-right'}">
+                                        <a><i class="fa fa-align-justify"></i></a>
+                                        <div class="uk-dropdown uk-dropdown-small uk-dropdown-bottom uk-text-left" aria-hidden="true">
+                                            <ul class="uk-nav uk-nav-dropdown">
+                                                <li>
+                                                    <a href="{{ url('puzzle_admin_media_file_show', {'id': file.id}) }}" class="show-modal">
+                                                        <i class="fa fa-eye"></i>
+                                                        {{ 'media.file.list.show'|trans }}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ url('puzzle_admin_media_file_update', {'id': file.id}) }}" class="show-modal">
+                                                        <i class="fa fa-pencil"></i>
+                                                        {{ 'media.file.list.update'|trans }}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ url('puzzle_admin_media_file_update_metadata', {'id': file.id}) }}" class="show-modal uk-text-truncate" title="{{ 'media.file.list.update_metadata'|trans }}">
+                                                        <i class="fa fa-pencil"></i>
+                                                        {{ 'media.file.list.update_metadata'|trans }}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ asset(file.path) }}" target="blank" download>
+                                                        <i class="fa fa-download"></i>
+                                                        {{ 'media.file.list.download'|trans }}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="#" data-route="{{ url('puzzle_admin_media_file_delete', {'id': file.id}) }}"  data-text="{{ 'media.file.delete.description'|trans({'%fileName%': file.displayName|default(file.name)}) }}" data-label="{{ file.displayName|default(file.name) }}" class="remove-item">
+                                                        <i class="fa fa-trash-o uk-text-danger"></i>
+                                                        {{ 'media.file.list.delete'|trans }}
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+		$('body').on('change', '.grouped-actions', function(e){
+			switch($(this).val()){
+				case 'copy':
+					showModal(Routing.generate('puzzle_admin_media_folder_browse'));
+					break;
+				case 'move':
+					showModal(Routing.generate('puzzle_admin_media_folder_browse', {'operation': 'move'}));
+					break;
+				case 'delete':
+					var modalId = 'delete-list-modal';
+					
+					UIkit.modal("#" + modalId).show();
+					$('#' + modalId).find('#delete-list-btn').data('delete-item-route', 'puzzle_admin_media_file_delete');
+				default:
+					break;
+			}
+		});
+	</script>
+{% endblock %}
+

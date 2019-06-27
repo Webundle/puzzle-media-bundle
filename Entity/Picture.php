@@ -3,6 +3,7 @@
 namespace Puzzle\MediaBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Knp\DoctrineBehaviors\Model\Timestampable\Timestampable;
 
 /**
  * Picture
@@ -15,6 +16,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Picture
 {
+    use Timestampable;
+    
     /**
      * @ORM\Column(name="id", type="string")
      * @ORM\Id
@@ -25,20 +28,18 @@ class Picture
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="width", type="integer")
+     * @ORM\Column(name="width", type="integer", nullable=true)
      */
     private $width;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="height", type="integer")
+     * @ORM\Column(name="height", type="integer", nullable=true)
      */
     private $height;
     
     /**
-     * @ORM\OneToOne(targetEntity="File", inversedBy="picture")
+     * @ORM\OneToOne(targetEntity="File", fetch="EAGER")
      * @ORM\JoinColumn(name="file_id", referencedColumnName="id")
      */
     private $file;

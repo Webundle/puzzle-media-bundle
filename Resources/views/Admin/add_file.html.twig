@@ -1,0 +1,76 @@
+{% trans_default_domain 'media' %}
+
+<div class="uk-modal-dialog">
+    <div class="uk-modal-body uk-margin-top">
+        <div class="uk-width-1-1">
+            <form method="post" action="{{ url('puzzle_admin_media_file_add') }}" class="uk-form-stacked">
+                <div class="uk-form-row" id="local">     
+                    <div id="file_upload_drop_file" class="uk-file-upload">
+                        <p class="uk-text mb10">{{ 'media.file.create.drag_and_drop'|trans|upper }}</p>
+                        <p class="uk-text-muted uk-text-small uk-margin-small-bottom">{{ 'media.file.create.or'|trans|upper }}</p>
+                        <a class="uk-form-file md-btn md-btn-flat md-btn-flat-primary" id="file_upload_label_file">
+                            {{ 'media.file.create.choose'|trans|upper }}
+                            <input id="file_upload_select_file" type="file">
+                        </a>
+                        
+                        {% if folder is not empty %}
+                            <input type="hidden" name="folder" value="{{ folder.id }}">
+                            <input type="hidden" id="file_filters_file" value="{{ folder.allowedExtensions|join('|')|default("*") }}">
+                            <input type="hidden" id="file_upload_context_file" value="{% if folder.parent is not empty %}{{ folder.id }}{% else %}media{% endif %}">
+                        {% else %}
+                            <input type="hidden" id="file_filters_file" value="*">
+                            <input type="hidden" id="file_upload_context_file" value="media">
+                        {% endif %}
+                        
+                    </div>
+                    <div id="file_upload_progressbar_file" class="uk-progress uk-hidden">
+                        <div class="uk-progress-bar" style="width:0" id="progress_bar_file">0%</div>
+                    </div>
+                </div>
+                <div class="md-card-content uk-hidden" id="target_container_file">
+                    <embed src="" alt="" id="target_file" width="100%" />
+                </div>
+                <input class="md-input" name="file" id="files_to_add_file" type="hidden"/>
+                <div class="uk-form-row uk-hidden alternate">
+                    <label for="path" class="uk-form-label">{{ 'media.file.create.url'|trans }}</label>
+                    <input class="md-input" name="path" id="path"/>
+                </div>
+                <div class="uk-form-row alternate uk-hidden">
+                    <label for="path" class="uk-form-label">{{ 'media.file.create.name'|trans }}</label>
+                    <input class="md-input" name="name" id="name"/>
+                </div>
+                <div class="uk-form-row">
+                    <label for="caption" class="uk-form-label">{{ 'media.file.create.caption'|trans }}</label>
+                    <textarea class="md-input" name="caption" id="caption"></textarea>
+                </div>
+                <div class="uk-form-row uk-hidden alternate">
+                    <div class="uk-form-row">
+                        <div class="uk-float-right">
+                            <input name="uploadable" id="uploadable" type="checkbox" data-switchery/>
+                        </div>
+                        <label for="caption" class="uk-display-block uk-margin-small-top uk-form-label">{{ 'media.file.create.copy'|trans }}</label>
+                    </div>
+                </div>
+
+                <div class="uk-text-right">
+                    <a href="#" id="toggle-source">{{ 'media.file.create.toggle_source'|trans }}</a>
+                    <input id="source" name="source" value="local" type="hidden"/>
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">{{ 'media.file.create.cancel'|trans }}</button>
+                    <button type="submit" class="md-btn md-btn-success">{{ 'media.file.create.submit'|trans }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% javascripts
+    'bundles/admin/js/common.js'
+    'bundles/admin/js/uikit_custom.js'
+    'bundles/admin/js/forms_file_upload.js'
+    'bundles/media/js/admin.js'
+    output="compiled/js/puzzle_admin_media_file_add.min.js" 
+%}
+    <script src="{{ asset_url }}"></script>
+{% endjavascripts %}

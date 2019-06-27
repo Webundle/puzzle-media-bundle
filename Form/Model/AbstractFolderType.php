@@ -16,27 +16,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class AbstractFolderType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options){
-        $builder
-            ->add('name', TextType::class, [
-                'translation_domain' => 'messages',
-                'label' => 'media.folder.name'
-            ])
-            ->add('tag', TextType::class, [
-                'translation_domain' => 'messages',
-                'label' => 'media.folder.tag',
-                'required' => false
-            ])
-            ->add('allowedExtensions', ChoiceType::class, array(
-                'translation_domain' => 'messages',
-                'label' => 'media.folder.allowedExtensions',
-                'choices' => array(
-                    "media.file.filter_all" => "*",
-                    "media.picture.filter" => MediaUtil::supportedPictureExtensions(),
-                    "media.audio.filter" => MediaUtil::supportedAudioExtensions(),
-                    "media.video.filter" => MediaUtil::supportedVideoExtensions(),
-                    "media.document.filter" => MediaUtil::supportedDocumentExtensions()
-                )
-            ))
+        $builder->add('name', TextType::class)
+                ->add('tag', TextType::class, ['required' => false])
+                ->add('allowedExtensions', ChoiceType::class, array(
+                    'choices' => array(
+                        "media.file.filter_all" => "*",
+                        "media.picture.filter" => MediaUtil::supportedPictureExtensions(),
+                        "media.audio.filter" => MediaUtil::supportedAudioExtensions(),
+                        "media.video.filter" => MediaUtil::supportedVideoExtensions(),
+                        "media.document.filter" => MediaUtil::supportedDocumentExtensions()
+                    )
+                ))
         ;
     }
     

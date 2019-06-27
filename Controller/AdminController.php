@@ -16,6 +16,13 @@ use Doctrine\ORM\EntityRepository;
 use Puzzle\MediaBundle\Event\FolderEvent;
 use Puzzle\MediaBundle\Form\Type\FolderUpdateType;
 use Puzzle\MediaBundle\Entity\Comment;
+use Puzzle\MediaBundle\Form\Type\FileUpdateType;
+use Puzzle\MediaBundle\Form\Type\VideoUpdateType;
+use Puzzle\MediaBundle\Form\Type\AudioUpdateType;
+use Puzzle\MediaBundle\Entity\Picture;
+use Puzzle\MediaBundle\Entity\Audio;
+use Puzzle\MediaBundle\Entity\Video;
+use Puzzle\MediaBundle\Entity\Document;
 
 /**
  * 
@@ -30,66 +37,46 @@ class AdminController extends Controller
 	 */
 	public function listFilesAction(Request $request){
 	    $em = $this->getDoctrine()->getManager();
-	    $type = $request->get('type');
-	    $filters = $joins = null;
 	    
-	    $criteria = [];
-	    if ($request->get('search')) {
-	        $criteria[] = ['key' => name, 'value' => '%'.$request->get('search').'%', 'operator' => 'LIKE'];
-	    }
-	    
-	    switch ($type) {
+	    switch ($request->query->get('type')) {
 	        case "picture":
-	            $filters .= "*.(". MediaUtil::supportedPictureExtensions().")";
-	            $criteria[] = ['key' => 'p.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["picture" => "p"]; // Associated Name, Alias
+	            $filters = "*.(". MediaUtil::supportedPictureExtensions().")";
+	            $items = $em->getRepository(Picture::class)->findByName($request->query->get('search'));
+	            
 	            break;
 	        case "audio":
-	            $filters .= "*.(".MediaUtil::supportedAudioExtensions().")";
-	            $criteria[] = ['key' => 'a.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["audio" => "a"];
+	            $filters = "*.(".MediaUtil::supportedAudioExtensions().")";
+	            $items = $em->getRepository(Audio::class)->findByName($request->query->get('search'));
 	            break;
 	        case "video":
-	            $filters .= "*.(".MediaUtil::supportedVideoExtensions().")";
-	            $criteria[] = ['key' => 'v.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["video" => "v"];
+	            $filters = "*.(".MediaUtil::supportedVideoExtensions().")";
+	            $items = $em->getRepository(Video::class)->findByName($request->query->get('search'));
 	            break;
 	        case "document":
-	            $filters .= "*.(".MediaUtil::supportedDocumentExtensions().")";
-	            $criteria[] = ['key' => 'd.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["document" => "d"];
-	            break;
-	        case "other":
-	            $criteria[] = ['key' => 'p.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $criteria[] = ['key' => 'v.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $criteria[] = ['key' => 'v.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $criteria[] = ['key' => 'd.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["picture" => "p", "document" => "d", "audio" => "a", "video" => "v"];
-	            $filters = "*";
+	            $filters = "*.(".MediaUtil::supportedDocumentExtensions().")";
+	            $items = $em->getRepository(Document::class)->findByName($request->query->get('search'));
 	            break;
 	        default:
 	            $filters = "*";
+	            $items = $em->getRepository(File::class)->findByName($request->query->get('search'));
 	            break;
 	    }
 	    
-	    $files = $em->getRepository(File::class)->customFindBy(null,$joins, $criteria, ['createdAt' => 'DESC']);
-	    $folders = $em->getRepository(Folder::class)->customFindBy(
-	        null, null, [['key' => 'appName', 'value' => 'media']], ['createdAt' => 'DESC']
-	    );
+	    $folders = $em->getRepository(Folder::class)->findBy(['appName' => 'media'], ['createdAt' => 'DESC']);
 	    
 	    if ($request->get('target') == 'modal') {
-	        return $this->render("AdminBundle:Media:list_files_in_modal.html.twig", array(
-	            'type' => $type,
+	        return $this->render("MediaBundle:Admin:list_files_in_modal.html.twig", array(
+	            'type' =>  $request->query->get('type'),
 	            'filters' => $filters,
-	            'files' => $files,
+	            'items' => $items,
 	            'enableMultipleSelect' => $request->get('multiple_select') ? true: false,
 	            'context' => $request->get('context')
 	        ));
 	    }
 	    
-	    return $this->render("AdminBundle:Media:list_files.html.twig",[
-	        'files' => $files,
-	        'type' => $type,
+	    return $this->render("MediaBundle:Admin:list_files.html.twig",[
+	        'items' => $items,
+	        'type' => $request->query->get('type'),
 	        'folders' => $folders,
 	        'filters' => $filters
 	    ]);
@@ -102,53 +89,36 @@ class AdminController extends Controller
 	public function browseFilesAction(Request $request){
 	    $em = $this->getDoctrine()->getManager();
 	    $type = $request->get('type');
-	    $filters = $joins = null;
+	    $filters = null;
 	    
-	    $criteria = [];
-	    if ($request->get('search')) {
-	        $criteria[] = ['key' => name, 'value' => '%'.$request->get('search').'%', 'operator' => 'LIKE'];
-	    }
-	    
-	    switch ($type) {
+	    switch ($request->query->get('type')) {
 	        case "picture":
-	            $filters .= "*.(". MediaUtil::supportedPictureExtensions().")";
-	            $criteria[] = ['key' => 'p.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["picture" => "p"]; // Associated Name, Alias
+	            $filters = "*.(". MediaUtil::supportedPictureExtensions().")";
+	            $items = $em->getRepository(Picture::class)->findByName($request->query->get('search'));
+	            
 	            break;
 	        case "audio":
-	            $filters .= "*.(".MediaUtil::supportedAudioExtensions().")";
-	            $criteria[] = ['key' => 'a.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["audio" => "a"];
+	            $filters = "*.(".MediaUtil::supportedAudioExtensions().")";
+	            $items = $em->getRepository(Audio::class)->findByName($request->query->get('search'));
 	            break;
 	        case "video":
-	            $filters .= "*.(".MediaUtil::supportedVideoExtensions().")";
-	            $criteria[] = ['key' => 'v.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["video" => "v"];
+	            $filters = "*.(".MediaUtil::supportedVideoExtensions().")";
+	            $items = $em->getRepository(Video::class)->findByName($request->query->get('search'));
 	            break;
 	        case "document":
-	            $filters .= "*.(".MediaUtil::supportedDocumentExtensions().")";
-	            $criteria[] = ['key' => 'd.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["document" => "d"];
-	            break;
-	        case "other":
-	            $criteria[] = ['key' => 'p.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $criteria[] = ['key' => 'v.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $criteria[] = ['key' => 'v.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $criteria[] = ['key' => 'd.id', 'value' => null,'operator' => 'IS NOT NULL'];
-	            $joins = ["picture" => "p", "document" => "d", "audio" => "a", "video" => "v"];
-	            $filters = "*";
+	            $filters = "*.(".MediaUtil::supportedDocumentExtensions().")";
+	            $items = $em->getRepository(Document::class)->findByName($request->query->get('search'));
 	            break;
 	        default:
 	            $filters = "*";
+	            $items = $em->getRepository(File::class)->findByName($request->query->get('search'));
 	            break;
 	    }
 	    
-	    $files = $em->getRepository(File::class)->customFindBy(null,$joins, $criteria, ['createdAt' => 'DESC']);
-	    
-	    return $this->render("AdminBundle:Media:browse_files.html.twig",[
+	    return $this->render("MediaBundle:Admin:browse_files.html.twig",[
 	        'type' => $type,
 	        'filters' => $filters,
-	        'files' => $files,
+	        'items' => $items,
 	        'enableMultipleSelect' => $request->get('multiple_select') ? true: false,
 	        'context' => $request->get('context')
 	    ]);
@@ -190,7 +160,7 @@ class AdminController extends Controller
 	            break;
 	    }
 	    
-	    return $this->render('AdminBundle:Media:embed_file.html.twig', [
+	    return $this->render('MediaBundle:Admin:embed_file.html.twig', [
 	        'filters' => $filters,
 	        'type' => $type,
 	        'accept' => $accept,
@@ -209,15 +179,24 @@ class AdminController extends Controller
 	        $file = $em->getRepository(File::class)->findOneBy(['path' => $id]);
 	    }
 	    
-	    return $this->render('AdminBundle:Media:show_file.html.twig', ['file' => $file]);
-	}
-	
-	
-	public function addFilesFormAction(Request $request) {
-	    $folderId = $request->query->get('folder');
-	    $folder = $folderId ? $this->getDoctrine()->getRepository(Folder::class)->find($folderId) : null;
+	    if ($file->isPicture()) {
+	        $type = File::PICTURE;
+	        $metadata = $em->getRepository(Picture::class)->findOneBy(['file' => $id]);
+	    }elseif ($file->isAudio()) {
+	        $type = File::AUDIO;
+	        $metadata = $em->getRepository(Audio::class)->findOneBy(['file' => $id]);
+	    }elseif ($file->isVideo()) {
+	        $type = File::VIDEO;
+	        $metadata = $em->getRepository(Video::class)->findOneBy(['file' => $id]);
+	    }elseif ($file->isDocument()) {
+	        $type = File::DOCUMENT;
+	        $metadata = $em->getRepository(Document::class)->findOneBy(['file' => $id]);
+	    }else {
+	        $type = null;
+	        $metadata = null;
+	    }
 	    
-	    return $this->render('AdminBundle:Media:add_files', ['folder' => $folder]);
+	    return $this->render('MediaBundle:Admin:show_file.html.twig', ['file' => $file, 'type' => $type, 'metadata' => $metadata]);
 	}
 	
 	/**
@@ -231,14 +210,35 @@ class AdminController extends Controller
 	    
 	    if (count($media) == 1) {
 	        $data = ['url' => $media[0]->getPath(), 'id' => $media[0]->getId()];
+	        
+	        if ($media[0]->isPicture()) {
+	            $data['type'] = File::PICTURE;
+	        }elseif ($media[0]->isAudio()) {
+	            $data['type'] = File::AUDIO;
+	        }elseif ($media[0]->isVideo()) {
+	            $data['type'] = File::VIDEO;
+	        }else {
+	            $data['type'] = File::DOCUMENT;
+	        }
 	    }else {
-	        $urls = $ids = [];
+	        $urls = $ids = $types = [];
+	        
 	        foreach ($media as $medium){
 	            $urls[] = $medium->getPath();
 	            $ids[] = $medium->getId();
+	            
+	            if ($media[0]->isPicture()) {
+	                $types[] = File::PICTURE;
+	            }elseif ($media[0]->isAudio()) {
+	                $types[] = File::AUDIO;
+	            }elseif ($media[0]->isVideo()) {
+	                $types[] = File::VIDEO;
+	            }else {
+	                $types[] = File::DOCUMENT;
+	            }
 	        }
 	        
-	        $data = ['url' => implode(',', $urls), 'id' => implode(',', $ids)];
+	        $data = ['url' => implode(',', $urls), 'id' => implode(',', $ids), 'type' => implode(',', $types)];
 	    }
 	    
 	    return new JsonResponse($data);
@@ -249,44 +249,146 @@ class AdminController extends Controller
 	 * 
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
-    public function addFileAction(Request $request) {
-        $data = $request->request->all();
-        
-        $em = $this->getDoctrine()->getManager();
-        
-        if ($data['source'] === "local") { // local
-            $file = $em->getRepository(File::class)->findOneBy(['path' => $data['path']]);
-        }else { // Remote
-            if (isset($data['uploadable']) && $data['uploadable'] === "checked"){
-                $file = $this->get('media.upload_manager')->uploadFromUrl($data['path'], $this->getUser());
-            }else {
-                
-                if (isset($data['folder']) && $data['folder'] != null) {
-                    $folder = $em->getRepository(Folder::class)->find($data['folder']);
+	public function addFileAction(Request $request) {
+	    $em = $this->getDoctrine()->getManager();
+	    $folderId = $request->query->get('folder');
+	    $folder = $folderId ? $em->getRepository(Folder::class)->find($folderId) : null;
+	    
+        if (true === $request->isMethod('POST')) {
+            $data = $request->request->all();
+            
+            if ($data['source'] === "local") { // local
+//                 $file = $em->getRepository(File::class)->findOneBy(['path' => $data['path']]);
+                $file = $em->getRepository(File::class)->find($data['file']);
+            }else { // Remote
+                if (isset($data['uploadable']) && $data['uploadable'] === "checked"){
+                    $file = $this->get('media.upload_manager')->uploadFromUrl($data['path'], $this->getUser());
                 }else {
-                    $folder = $this->get('media.file_manager')->createFolder(Folder::ROOT_APP_NAME, $this->getUser());
+                    $file = new File();
+                    $file->setName($data['name']);
+                    $file->setPath($data['path']);
+                    
+                    $em->persist($file);
                 }
-                
-                $file = new File();
-                $file->setName($data['name']);
-                $file->setPath($data['path']);
-                
-                $em->persist($file);
-                $folder->addFile($file->getId());
             }
             
+            $file->setDisplayName($data['name']);
             $file->setCaption($data['caption']);
+            
+            $folder = false === empty($data['folder']) ? $em->getRepository(Folder::class)->find($data['folder']) : $this->get('media.file_manager')->createFolder(Folder::ROOT_APP_NAME, $this->getUser());
+            $folder->addFile($file->getId());
+            
             $em->flush();
+            $this->addFlash('success', $this->get('translator')->trans('media.file.create.success', ['%fileName%' => $file->getName()], 'media'));
+            
+            if (false === empty($data['folder'])) {
+                return $this->redirect($this->generateUrl('puzzle_admin_media_folder_show', ['id' => $data['folder']]));
+            }
+            
+            return $this->redirect($this->generateUrl('puzzle_admin_media_file_list'));
         }
         
-        $this->addFlash('success', $this->get('translator')->trans('media.file.create.success', ['%fileName%' => $file->getName()], 'media'));
-        
-        if (isset($data['folder']) && $data['folder'] != null) {
-            return $this->redirect($this->generateUrl('puzzle_admin_media_folder_show', ['id' => $data['folder']]));
-        }
-        
-        return $this->redirect($this->generateUrl('puzzle_admin_media_file_list'));
+        return $this->render('MediaBundle:Admin:add_file.html.twig', [
+            'folder' => $folder
+        ]);
     }
+    
+    /**
+     * Add files
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addFilesAction(Request $request) {
+        $folderId = $request->query->get('folder');
+        $folder = $folderId ? $this->getDoctrine()->getRepository(Folder::class)->find($folderId) : null;
+        
+        return $this->render('MediaBundle:Admin:add_files.html.twig', [
+            'folder' => $folder,
+            'filters' => $folder && $folder->getAllowedExtensions() ? implode(',', $folder->getAllowedExtensions()) : '*',
+            'refreshUrl' => $folderId ? $this->generateUrl('puzzle_admin_media_folder_show', ['id' => $folderId]) : null
+        ]);
+    }
+    
+    /**
+     * Update file
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function updateFileAction(Request $request, $id) {
+        $em = $this->getDoctrine()->getManager();
+        $file = $em->getRepository(File::class)->find($id);
+        $redirectUrl = false === empty($request->query->get('folder')) ? 
+                        $this->generateUrl('puzzle_admin_media_folder_show', ['id' => $request->query->get('folder')]) :
+                        $this->generateUrl('puzzle_admin_media_file_list');
+        
+        $form = $this->createForm(FileUpdateType::class, $file, [
+            'method' => 'POST',
+            'action' => $this->generateUrl('puzzle_admin_media_file_update', ['id' => $id, 'folder' => $request->query->get('folder')])
+        ]);
+        
+        $form->handleRequest($request);
+        
+        if (true === $form->isSubmitted()) {
+            $data = $request->request->all();
+            $em->flush();
+            
+            $this->addFlash('success', $this->get('translator')->trans('media.file.update.success', ['%fileName%' => $file->getName()], 'media'));
+            return $this->redirect($data['redirect_url'] ??  $this->generateUrl('puzzle_admin_media_file_list'));
+        }
+        
+        return $this->render('MediaBundle:Admin:update_file.html.twig', [
+            'file' => $file,
+            'form' => $form->createView(),
+            'redirectUrl' => $redirectUrl
+        ]);
+    }
+    
+    /**
+     * Update file
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function updateFileMetadataAction(Request $request, $id) {
+        $em = $this->getDoctrine()->getManager();
+        $file = $em->getRepository(File::class)->find($id);
+        $redirectUrl = false === empty($request->query->get('folder')) ?
+                       $this->generateUrl('puzzle_admin_media_folder_show', ['id' => $request->query->get('folder')]) :
+                       $this->generateUrl('puzzle_admin_media_file_list');
+        
+       $formType = null;
+        if ($file->isAudio()) {
+            $fileType = $em->getRepository(Audio::class)->findOneBy(['file' => $id]);
+            $formType = AudioUpdateType::class;
+            $type = File::AUDIO;
+        }elseif ($file->isVideo()) {
+            $fileType = $em->getRepository(Video::class)->findOneBy(['file' => $id]);
+            $formType = VideoUpdateType::class;
+            $type = File::VIDEO;
+        }
+        
+        $form = $this->createForm($formType, $fileType, [
+            'method' => 'POST',
+            'action' => $this->generateUrl('puzzle_admin_media_file_update_metadata', ['id' => $id, 'folder' => $request->query->get('folder')])
+        ]);
+        
+        $form->handleRequest($request);
+        
+        if (true === $form->isSubmitted()) {
+            $data = $request->request->all();
+            $em->flush();
+            
+            $this->addFlash('success', $this->get('translator')->trans('media.file.update.success', ['%fileName%' => $file->getName()], 'media'));
+            return $this->redirect($data['redirect_url'] ??  $this->generateUrl('puzzle_admin_media_file_list'));
+        }
+        
+        return $this->render('MediaBundle:Admin:update_file_metadata.html.twig', [
+            'file' => $fileType,
+            'type' => $type,
+            'form' => $form->createView(),
+            'redirectUrl' => $redirectUrl
+        ]);
+    }
+    
 
     /***
      * Delete File
@@ -307,7 +409,20 @@ class AdminController extends Controller
         
         $message = $this->get('translator')->trans('media.file.delete.success', ['%fileName%' => $file->getName()], 'media');
         
-        $em = $this->getDoctrine()->getManager();
+        if ($file->isPicture()) {
+            $picture = $em->getRepository(Picture::class)->findOneBy(['file' => $id]);
+            $em->remove($picture);
+        }elseif ($file->isAudio()) {
+            $audio = $em->getRepository(Audio::class)->findOneBy(['file' => $id]);
+            $em->remove($audio);
+        }elseif ($file->isVideo()) {
+            $video = $em->getRepository(Video::class)->findOneBy(['file' => $id]);
+            $em->remove($video);
+        }elseif ($file->isDocument()) {
+            $document = $em->getRepository(Document::class)->findOneBy(['file' => $id]);
+            $em->remove($document);
+        }
+        
         $em->remove($file);
         $em->flush();
         
@@ -330,14 +445,9 @@ class AdminController extends Controller
         $er = $this->getDoctrine()->getRepository(Folder::class);
         
         $folderDefault = $er->findOneBy(['appName' => Folder::ROOT_APP_NAME, 'name' => Folder::ROOT_NAME]);
-        $folders = $er->customFindBy(
-            null, null, [
-                ['key' => 'parent', 'value' => null, 'operator' => 'IS NULL'], 
-                ['key' => 'appName', 'value' => 'media','operator' => '!=']
-            ]
-        );
+        $folders = $er->findByReverseAppName('media');
         
-        return $this->render("AdminBundle:Media:list_folders.html.twig", array(
+        return $this->render("MediaBundle:Admin:list_folders.html.twig", array(
             'folders' => $folders,
             'folderDefault' => $folderDefault
         ));
@@ -354,14 +464,9 @@ class AdminController extends Controller
             $parent = $er->findOneBy(['appName' => Folder::ROOT_APP_NAME, 'name' => Folder::ROOT_NAME]);
         }
         
-        $folders = $er->customFindBy(
-            null, null, [
-                ['key' => 'parent', 'value' => $parent->getId()], 
-                ['key' => 'appName', 'value' => 'media']
-            ]
-        );
+        $folders = $er->findByAppName(Folder::ROOT_APP_NAME, $parent->getId());
         
-        return $this->render("AdminBundle:Media:browse_folders.html.twig", array(
+        return $this->render("MediaBundle:Admin:browse_folders.html.twig", array(
             'operation' => $request->query->get('operation'),
             'parent' => $parent,
             'folders' => $folders
@@ -382,38 +487,10 @@ class AdminController extends Controller
             $folder = $em->getRepository(Folder::class)->findOneBy(['slug' => $id]);
         }
         
-        $criteria = [];
-        
-        if ($request->query->get('search')) {
-            $criteria[] = ['key' => 'name', 'value' => '%'.$request->query->get('search').'%', 'operator' => 'LIKE'];
-        }
-        
-        $customCriteria = $criteria;
-        $customCriteria[] = ['key' => 'parent', 'value' => $folder->getId()];
-        
-        $childs = $em->getRepository(Folder::class)->customFindBy(null, null, $customCriteria);
-        unset($customCriteria);
-        
-        $files = $list = null;
-        foreach ($folder->getFiles() as $key => $file) {
-            if ($key == 0){
-                $list = "'".$file."'";
-            }else {
-                $list .= ",'".$file."'";
-            }
-        }
-        
-        $customCriteria = $criteria;
-        $customCriteria[] = ['key' =>  'id', 'value' => null, 'operator' => 'IN ('.$list.')'];
-        if ($list !== null) {
-            $files = $em->getRepository(File::class)->customFindBy(null, null, $customCriteria);
-        }
-        
-        unset($customCriteria);
-        unset($criteria);
-        unset($list);
-        
-        return $this->render("AdminBundle:Media:show_folder.html.twig", array(
+        $childs = $em->getRepository(Folder::class)->findByName($request->query->get('search'), $folder->getId());
+        $files = false === empty($folder->getFiles()) ? $em->getRepository(File::class)->findByIds($folder->getFiles()) : null;
+            
+        return $this->render("MediaBundle:Admin:show_folder.html.twig", array(
             'folder' => $folder,
             'childs' => $childs,
             'files' => $files
@@ -460,12 +537,12 @@ class AdminController extends Controller
             $em->flush();
             
             $this->get('event_dispatcher')->dispatch(MediaEvents::CREATE_FOLDER, new FolderEvent($folder));
+            $message = $this->get('translator')->trans('media.folder.create.success', ['%folderName%' => $folder->getName()], 'media');
             
             if ($request->isXmlHttpRequest() === true) {
-                return new JsonResponse(['status' => true]);
+                return new JsonResponse($message);
             }
             
-            $message = $this->get('translator')->trans('success.post', ['%item%' => $folder->getName()], 'messages');
             $this->addFlash('success', $message);
             
             if ($folder->getParent() !== null) {
@@ -475,7 +552,7 @@ class AdminController extends Controller
             return $this->redirectToRoute('puzzle_admin_media_folder_list');
         }
         
-        return $this->render("AdminBundle:Media:create_folder.html.twig", [
+        return $this->render("MediaBundle:Admin:create_folder.html.twig", [
             'form' => $form->createView()
         ]);
     }
@@ -509,7 +586,7 @@ class AdminController extends Controller
                 $this->get('event_dispatcher')->dispatch(MediaEvents::RENAME_FOLDER, new FolderEvent($folder, ['oldAbsolutePath' => $oldAbsolutePath]));
             }
             
-            $message = $this->get('translator')->trans('success.put', ['%item%' => $folder->getName()], 'messages');
+            $message = $this->get('translator')->trans('media.folder.update.success', ['%folderName%' => $folder->getName()], 'media');
             
             if ($request->isXmlHttpRequest() === true) {
                 return new JsonResponse($message);
@@ -519,7 +596,7 @@ class AdminController extends Controller
             return $this->redirectToRoute('puzzle_admin_media_folder_show', array('id' => $folder->getId()));
         }
         
-        return $this->render("AdminBundle:Media:update_folder.html.twig", [
+        return $this->render("MediaBundle:Admin:update_folder.html.twig", [
             'folder' => $folder,
             'form' => $form->createView()
         ]);
@@ -539,39 +616,43 @@ class AdminController extends Controller
             $folder = $em->getRepository(Folder::class)->findOneBy(['slug' => $id]);
         }
         
-        $data = $request->request->all();
-        
-        if (isset($data['files_to_add'])) {
-            $filesTaAdd = is_string($data['files_to_add']) ? explode(',', $data['files_to_add']) : $data['files_to_add'];
+        if (true === $request->isMethod('POST')) {
+            $data = $request->request->all();
             
-            foreach ($filesTaAdd as $fileTaAdd) {
-                $folder->addFile($fileTaAdd);
+            if (isset($data['files_to_add'])) {
+                $filesTaAdd = is_string($data['files_to_add']) ? explode(',', $data['files_to_add']) : $data['files_to_add'];
+                
+                foreach ($filesTaAdd as $fileTaAdd) {
+                    $folder->addFile($fileTaAdd);
+                }
             }
+            
+            $em->flush();
+            
+            if (isset($data['operation']) && $data['operation'] == "move") {
+                $folderEvent = new FolderEvent($folder, ['preserve_files' => false]);
+            }else {
+                $folderEvent = new FolderEvent($folder);
+            }
+            
+            $this->get('event_dispatcher')->dispatch(MediaEvents::ADD_FILES_TO_FOLDER, $folderEvent);
+            
+            $message = $this->get('translator')->trans('media.folder.update.success', ['%folderName%' => $folder->getName()], 'media');
+            
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse($message);
+            }
+            
+            $this->addFlash('success', $message);
+            return $this->redirectToRoute('puzzle_admin_media_folder_show', array('id' => $folder->getId()));
         }
         
-        $em->flush();
-        
-        if (isset($data['operation']) && $data['operation'] == "move") {
-            $folderEvent = new FolderEvent($folder, ['preserve_files' => false]);
-        }else {
-            $folderEvent = new FolderEvent($folder);
-        }
-        
-        $this->get('event_dispatcher')->dispatch(MediaEvents::ADD_FILES_TO_FOLDER, $folderEvent);
-        
-        $message = $this->get('translator')->trans('success.put', ['%item%' => $folder->getName()], 'messages');
-        
-        if ($request->isXmlHttpRequest()) {
-            return new JsonResponse($message);
-        }
-        
-        $this->addFlash('success', $message);
-        return $this->redirectToRoute('puzzle_admin_media_folder_show', array('id' => $folder->getId()));
+        return $this->render('MediaBundle:Admin:update_folder_add_files.html.twig', ['folder' => $folder]);
     }
     
     /**
      *
-     * Update Folder by adding files
+     * Update Folder by removing files
      *
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -595,13 +676,26 @@ class AdminController extends Controller
                     'absolutePath' => $file->getAbsolutePath()
                 ]));
                 
+                if ($file->isPicture()) {
+                    $picture = $em->getRepository(Picture::class)->findOneBy(['file' => $file->getId()]);
+                    $em->remove($picture);
+                }elseif ($file->isAudio()) {
+                    $audio = $em->getRepository(Audio::class)->findOneBy(['file' => $file->getId()]);
+                    $em->remove($audio);
+                }elseif ($file->isVideo()) {
+                    $video = $em->getRepository(Video::class)->findOneBy(['file' => $file->getId()]);
+                    $em->remove($video);
+                }elseif ($file->isDocument()) {
+                    $document = $em->getRepository(Document::class)->findOneBy(['file' => $file->getId()]);
+                    $em->remove($document);
+                }
+                
                 $em->remove($file);
             }
         }
         
         $em->flush();
-        
-        $message = $this->get('translator')->trans('success.put', ['%item%' => $folder->getName()], 'messages');
+        $message = $this->get('translator')->trans('media.folder.update.success', ['%folderName%' => $folder->getName()], 'media');
         
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse($message);
@@ -613,7 +707,7 @@ class AdminController extends Controller
     
     /**
      *
-     * Update Folder by adding file
+     * Update Folder by removing file
      *
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -631,11 +725,25 @@ class AdminController extends Controller
         
         $folder->removeFile($file->getId());
         
-        $message = $this->get('translator')->trans('success.delete', ['%item%' => $file->getId()], 'messages');
+        $message = $this->get('translator')->trans('media.folder.update.success', ['%folderName%' => $folder->getName()], 'media');
         
         $this->get('event_dispatcher')->dispatch(MediaEvents::DELETING_FILE, new FileEvent([
             'absolutePath' => $file->getAbsolutePath()
         ]));
+        
+        if ($file->isPicture()) {
+            $picture = $em->getRepository(Picture::class)->findOneBy(['file' => $file->getId()]);
+            $em->remove($picture);
+        }elseif ($file->isAudio()) {
+            $audio = $em->getRepository(Audio::class)->findOneBy(['file' => $file->getId()]);
+            $em->remove($audio);
+        }elseif ($file->isVideo()) {
+            $video = $em->getRepository(Video::class)->findOneBy(['file' => $file->getId()]);
+            $em->remove($video);
+        }elseif ($file->isDocument()) {
+            $document = $em->getRepository(Document::class)->findOneBy(['file' => $file->getId()]);
+            $em->remove($document);
+        }
         
         $em->remove($file);
         $em->flush();
@@ -668,12 +776,10 @@ class AdminController extends Controller
             $route = $this->redirectToRoute('puzzle_admin_media_folder_list');
         }
         
-        $message = $this->get('translator')->trans('success.delete', ['%item%' => $folder->getName()], 'messages');
-        
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($folder);
-        
+        $message = $this->get('translator')->trans('media.folder.update.success', ['%folderName%' => $folder->getName()], 'media');
         $this->get('event_dispatcher')->dispatch(MediaEvents::DELETING_FOLDER, new FolderEvent($folder));
+        
+        $em->remove($folder);
         $em->flush();
         
         $this->addFlash('success', $message);
@@ -696,7 +802,7 @@ class AdminController extends Controller
         }
         
         if (false === $this->get('media.file_manager')->zipDir($folder->getAbsolutePath())) {
-            $message = $this->get('translator')->trans('media.folder.compress.error', [], 'media');
+            $message = $this->get('translator')->trans('media.folder.compress.error', ['%folderName%' => $folder->getName()], 'media');
             
             if (true === $request->isXmlHttpRequest()) {
                 return new JsonResponse($message, 500);
@@ -707,7 +813,7 @@ class AdminController extends Controller
         }
         
         $targetUrl = $folder->getPath().'.zip';
-        $message = $this->get('translator')->trans('media.folder.compress.success', [], 'media');
+        $message = $this->get('translator')->trans('media.folder.compress.success', ['%folderName%' => $folder->getName()], 'media');
         
         if (true === $request->isXmlHttpRequest()) {
             return new JsonResponse(['message' => $message, 'target' => $targetUrl], 200);
@@ -728,7 +834,7 @@ class AdminController extends Controller
                         ->getRepository(Comment::class)
                         ->findBy(['file' => $request->get('file')],['createdAt' => 'DESC']);
         
-        return $this->render("AdminBundle:Media:list_comments.html.twig", array(
+        return $this->render("MediaBundle:Admin:list_comments.html.twig", array(
             'comments' => $comments
         ));
     }

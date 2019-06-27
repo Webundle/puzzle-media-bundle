@@ -14,9 +14,21 @@ puzzle_admin_media_file_add:
     path:     /file/add
     defaults: { _controller: MediaBundle:Admin:addFile }
 
+puzzle_admin_media_file_add_multiple:
+    path:     /file/add-multiple
+    defaults: { _controller: MediaBundle:Admin:addFiles }
+
 puzzle_admin_media_file_show:
     path:     /file/{id}/show
     defaults: { _controller: MediaBundle:Admin:showFile }
+
+puzzle_admin_media_file_update:
+    path:     /file/{id}/update
+    defaults: { _controller: MediaBundle:Admin:updateFile }
+
+puzzle_admin_media_file_update_metadata:
+    path:     /file/{id}/update-metadata
+    defaults: { _controller: MediaBundle:Admin:updateFileMetadata }
 
 puzzle_admin_media_file_delete:
     path:     /file/{id}/delete

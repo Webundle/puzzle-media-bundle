@@ -20,16 +20,24 @@ use Doctrine\Common\Collections\Collection;
  */
 class File
 {
-    use PrimaryKeyTrait,
-        Timestampable,
-        Blameable
-    ;
+    use PrimaryKeyTrait, Timestampable, Blameable;
+    
+    const PICTURE = 'picture';
+    const VIDEO = 'video';
+    const AUDIO = 'audio';
+    const DOCUMENT = 'document';
     
     /**
      * @ORM\Column(name="name", type="string", length=255)
      * @var string
      */
     private $name;
+    
+    /**
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=true)
+     * @var string
+     */
+    private $displayName;
     
     /**
      * @var string
@@ -60,26 +68,6 @@ class File
      * @var boolean
      */
     private $enableComments;
-    
-    /**
-     * @ORM\OneToOne(targetEntity="Picture", mappedBy="file", cascade={"persist", "remove"})
-     */
-    private $picture;
-    
-    /**
-     * @ORM\OneToOne(targetEntity="Audio", mappedBy="file", cascade={"persist", "remove"})
-     */
-    private $audio;
-    
-    /**
-     * @ORM\OneToOne(targetEntity="Video", mappedBy="file", cascade={"persist", "remove"})
-     */
-    private $video;
-    
-    /**
-     * @ORM\OneToOne(targetEntity="Document", mappedBy="file", cascade={"persist", "remove"})
-     */
-    private $document;
     
     /**
      * @ORM\OneToMany(targetEntity="Comment", mappedBy="file")
@@ -116,6 +104,15 @@ class File
     
     public function getOriginalName() :? string {
         return $this->name;
+    }
+    
+    public function setDisplayName($displayName) :self {
+        $this->displayName = $displayName;
+        return $this;
+    }
+    
+    public function getDisplayName() :?string {
+        return $this->displayName;
     }
     
     public function setCaption($caption){
@@ -178,42 +175,6 @@ class File
     
     public function getAbsolutePath(){
     	return $this->getBaseDir().$this->path;
-    }
-
-    public function setPicture(Picture $picture = null) : self {
-        $this->picture = $picture;
-        return $this;
-    }
-
-    public function getPicture() :? Picture {
-        return $this->picture;
-    }
-
-    public function setAudio(Audio $audio = null) : self {
-        $this->audio = $audio;
-        return $this;
-    }
-
-    public function getAudio() :? Audio {
-        return $this->audio;
-    }
-
-    public function setVideo(Video $video = null) : self {
-        $this->video = $video;
-        return $this;
-    }
-
-    public function getVideo() :? Video {
-        return $this->video;
-    }
-
-    public function setDocument(Document $document = null) : self {
-        $this->document = $document;
-        return $this;
-    }
-
-    public function getDocument() :? Document {
-        return $this->document;
     }
     
     public function addComment(Comment $comment) : self {

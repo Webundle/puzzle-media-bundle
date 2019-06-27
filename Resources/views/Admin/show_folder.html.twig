@@ -1,0 +1,226 @@
+{% trans_default_domain 'media' %}
+
+{% extends 'MediaBundle:Admin:layout.html.twig' %}
+
+{% block title %}{{ parent() }} - {{ "media.folder.show.title"|trans|capitalize }}{% endblock %}
+
+{% block headingactions %}
+<div class="heading_actions">
+    <div class="md-card-head-menu" data-uk-dropdown="{pos:'bottom-right'}">
+        <a class="uk-text-bold" href="#" data-uk-modal="{ center:true }">
+            {{ 'media.folder.show.actions'|trans|upper }}
+            <i class="fa fa-ellipsis-v"></i>
+        </a>
+        <div class="uk-dropdown">
+            <ul class="uk-nav">
+                {% if folder.appName == "media" %}
+                    <li>
+                        <a href="{{ url('puzzle_admin_media_file_add', {'folder': folder.id}) }}" class="show-modal">
+                            <i class="fa fa-plus uk-margin-small-right"></i>
+                            {{ 'media.folder.show.add_file'|trans }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('puzzle_admin_media_folder_update_files_add', {'id': folder.id}) }}" class="show-modal">
+                            <i class="fa fa-plus uk-margin-small-right"></i>
+                            {{ 'media.folder.show.add_files'|trans }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('puzzle_admin_media_folder_create', { 'parent': folder.id })}}" class="show-modal" id="{{ folder.id }}">
+                            <i class="fa fa-plus uk-margin-small-right"></i>
+                            {{ 'media.folder.show.new'|trans }}
+                        </a>
+                    </li>
+                {% endif %}
+                <li>
+                    <a href="{{ url('puzzle_admin_media_folder_compress', { 'id': folder.id }) }}" class="download-folder" target="_blank">
+                        <i class="fa fa-cloud-download uk-margin-small-right"></i>
+                        {{ 'media.folder.show.download'|trans }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block breadcrumbmodule %}
+    {{ parent() }}
+    <a href=" {{ url('puzzle_admin_media_folder_list') }} ">
+       {{ 'media.folder.list.title'|trans|capitalize }}
+    </a>
+    <i class="fa fa-chevron-right"></i>
+    {% if folder.parent is not empty %}
+    <a href=" {{ url('puzzle_admin_media_folder_show', {'id': folder.parent.id}) }}">
+       ...
+    </a>
+    <i class="fa fa-chevron-right"></i>
+    {% endif %}
+    <em>{{ "media.folder.show.title"|trans|capitalize }}</em>
+{% endblock %}
+
+{% block content %}
+    <div id="page_content_inner">
+    	<div class="uk-grid uk-grid-medium" data-uk-grid-margin>
+            <div class="uk-width-xLarge-3-10 uk-width-large-3-10">
+            	<div class="md-card">
+                    <div class="md-card-content">
+                        <div class="uk-margin-bottom">
+                            <label class="uk-text-bold">{{ 'media.folder.show.name'|trans }} : </label>
+                            <span>{{ folder.name }}</span>
+                        </div>
+                        <div class="uk-margin-bottom">
+                            <label class="uk-text-bold">{{ 'media.folder.show.allowed_extensions'|trans }} : </label>
+                            <div>
+                                {% if  folder.allowedExtensions is not empty %}
+                                    {% for allowedExtension in folder.allowedExtensions %}
+                                		<span class="uk-badge">{{ allowedExtension }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="uk-margin-bottom">
+                            <label class="uk-text-bold">{{ 'media.folder.show.created_at'|trans }} : </label>
+                            <span>{{ date_time_ago(folder.createdAt) }}</span>
+                        </div>
+                        <div class="uk-margin-bottom">
+                            <label class="uk-text-bold">{{ 'media.folder.show.updated_at'|trans }} : </label>
+                            <span>{{ date_time_ago(folder.updatedAt) }}</span>
+                        </div>
+                        <div class="uk-margin-bottom">
+                            <label class="uk-text-bold">{{ 'media.folder.show.content'|trans }} : </label>
+                            <span class="uk-margin-right">{{ childs|length }} <i class="fa fa-folder"></i></span>
+                            <span>{{ files|length }} <i class="fa fa-file-o"></i></span>
+                        </div>
+                        <div>
+                            <label class="uk-text-bold">{{ 'media.folder.show.description'|trans }} : </label>
+                            <span>{{ folder.description }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% if folder.appName == "media" %}
+                <div class="uk-text-left uk-margin-top">
+                    <a href="{{ url('puzzle_admin_media_folder_update', { 'id': folder.id })}}" class="show-modal md-btn md-btn-primary" id="{{ folder.id }}">
+                        <i class="fa fa-pencil uk-margin-small-right"></i>
+                        {{ "media.folder.show.update"|trans }}
+                    </a>
+                    <a href="#" class="remove-item md-btn md-btn-danger" data-route="{{ url('puzzle_admin_media_folder_delete', {'id' : folder.id}) }}" data-label="{{ folder.name }}" data-title="{{ 'media.folder.delete.title' }}" data-text="{{ 'media.folder.delete.description'|trans({'%folderName%': folder.name}) }}">
+                        <i class="fa fa-trash-o uk-margin-small-right"></i>
+                        {{ "media.folder.show.delete"|trans }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="uk-width-xLarge-7-10 uk-width-large-7-10">
+                <div class="md-card">
+                    <div class="md-card-content">
+                        <table id="dt_individual_search" class="uk-table uk-table-hover" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>{{ 'media.folder.show.name'|trans }}</th>
+                                    <th>{{ 'media.folder.show.date'|trans }}</th>
+                                    <th class="uk-text-right no-sort">{{ 'media.folder.show.actions'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for folder in childs %}
+                                    <tr>
+                                        <td>
+                                            <div class="uk-text-truncate">
+                                                <a href="{{ url('puzzle_admin_media_folder_show', {'id': folder.id}) }}" title="{{ folder.name }}">
+                                                    <i class="fa fa-folder fa-2x uk-margin-right"></i>
+                                                    <span style="vertical-align: top;">{{ folder.name|capitalize }}</span>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td>{{ date_time_ago(folder.updatedAt) }}</td>
+                                        <td class="uk-text-right">
+                                            <div class="uk-button-dropdown" data-uk-dropdown="{pos:'bottom-right'}">
+                                                <a><i class="fa fa-align-justify"></i></a>
+                                                <div class="uk-dropdown uk-dropdown-small uk-dropdown-bottom uk-text-left" aria-hidden="true">
+                                                    <ul class="uk-nav uk-nav-dropdown">
+                                                        <li>
+                                                            <a href="{{ url('puzzle_admin_media_folder_show', { 'id': folder.id }) }}">
+                                                                <i class="fa fa-eye"></i>
+                                                                {{ 'media.folder.list.show'|trans }}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="{{ url('puzzle_admin_media_folder_update', { 'id': folder.id }) }}" class="show-modal">
+                                                                <i class="fa fa-pencil"></i>
+                                                                {{ 'media.folder.list.update'|trans }}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#" data-route="{{ url('puzzle_admin_media_folder_delete', {'id': folder.id}) }}" data-text="{{ 'media.folder.delete.description'|trans({'%folderName%': folder.name}) }}" data-label="{{ folder.name }}" class="remove-item">
+                                                                <i class="fa fa-trash-o uk-text-danger"></i>
+                                                                {{ 'media.folder.list.delete'|trans }}
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% for file in files %}
+                                    <tr>
+                                        <td>
+                                            <div class="uk-text-truncate">
+                                                <a href="{{ url('puzzle_admin_media_file_show', {'id': file.id}) }}" class="show-modal">
+                                                    <i class="fa fa-file fa-2x uk-margin-right"></i>
+                                                    <span style="vertical-align: top;">{{ file.displayName|default(file.name) }}</span>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td>{{ date_time_ago(file.createdAt) }}</td>
+                                        <td class="uk-text-right">
+                                            <div class="uk-button-dropdown" data-uk-dropdown="{pos:'bottom-right'}">
+                                                <a><i class="fa fa-align-justify"></i></a>
+                                                <div class="uk-dropdown uk-dropdown-small uk-dropdown-bottom uk-text-left" aria-hidden="true">
+                                                    <ul class="uk-nav uk-nav-dropdown">
+                                                        <li>
+                                                            <a href="{{ url('puzzle_admin_media_file_show', { 'id': file.id }) }}" class="show-modal">
+                                                                <i class="fa fa-eye"></i>
+                                                                {{ 'media.file.list.show'|trans }}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="{{ url('puzzle_admin_media_file_update', { 'id': file.id, 'folder': folder.id }) }}" class="show-modal">
+                                                                <i class="fa fa-pencil"></i>
+                                                                {{ 'media.file.list.update'|trans }}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="{{ url('puzzle_admin_media_file_update_metadata', {'id': file.id, 'folder': folder.id}) }}"  class="show-modal uk-text-truncate" title="{{ 'media.file.list.update_metadata'|trans }}">
+                                                                <i class="fa fa-pencil"></i>
+                                                                {{ 'media.file.list.update_metadata'|trans }}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="{{ asset(file.path) }}" target="blank" download>
+                                                                <i class="fa fa-download"></i>
+                                                                {{ 'media.file.list.download'|trans }}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#" data-route="{{ url('puzzle_admin_media_folder_update_file_remove', {'id': folder.id, 'fileId': file.id}) }}" data-text="{{ 'media.file.delete.description'|trans({'%fileName%': file.displayName|default(file.name)}) }}" data-label="{{ file.displayName|default(file.name) }}" class="remove-item">
+                                                                <i class="fa fa-trash-o uk-text-danger"></i>
+                                                                {{ 'media.folder.list.delete'|trans }}
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

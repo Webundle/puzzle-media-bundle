@@ -3,6 +3,7 @@
 namespace Puzzle\MediaBundle\Repository;
 
 use Puzzle\AdminBundle\Repository\PuzzleRepository;
+use Puzzle\MediaBundle\Util\MediaUtil;
 
 /**
  * FileRepository
@@ -13,57 +14,48 @@ use Puzzle\AdminBundle\Repository\PuzzleRepository;
 class FileRepository extends PuzzleRepository
 {
 	/**
-	 * Find files which are pictures
-	 *
-	 * @return array
+	 * Find by name
+	 * @param string $name
 	 */
-	public function findPictures()
+	public function findByName(string $name = null)
 	{
-		return $this->_em
-					->createQuery("SELECT f FROM ". $this->_entityName . " f JOIN f.picture p WHERE p.id IS NOT NULL ORDER BY f.createdAt DESC")
-					->getResult();
+	   $builder = $this->createQueryBuilder('f')
+	                   ->select()
+                       ->distinct();
+	   
+        if ($name) {
+           $builder->where('f.displayName LIKE :name')
+                   ->setParameter(':name', '%'.$name.'%');
+        }
+        
+        return $builder->orderBy('f.createdAt', 'DESC')
+                ->getQuery()
+                ->getResult();
 	}
 	
 	/**
-	 * Find files which are audios
-	 *
+	 * Find by ids
+	 * 
+	 * @param string $list
 	 * @return array
 	 */
-	public function findAudios()
+	public function findByIds(array $ids)
 	{
-		return $this->_em
-		            ->createQueryBuilder()
-		            ->select('f')
-		            ->from($this->_entityName, 'f')
-		            ->innerJoin('f.audio', 'a')
-		            ->where('a.id IS NOT NULL')
-		            ->orderBy('f.createdAt', 'DESC')
-		            ->getQuery()
-		            ->execute();
-	}
-	
-	/**
-	 * Find files which are videos
-	 *
-	 * @return array
-	 */
-	public function findVideos()
-	{
-		return $this->_em
-					->createQuery("SELECT f FROM ". $this->_entityName . " f JOIN f.video v WHERE v.id IS NOT NULL ORDER BY f.createdAt DESC")
-					->getResult();
-	}
-	
-	/**
-	 * Find files which are documents
-	 *
-	 * @return array
-	 */
-	public function findDocuments()
-	{
-		return $this->_em
-					->createQuery("SELECT f FROM ". $this->_entityName . " f JOIN f.document d WHERE d.id IS NOT NULL ORDER BY f.createdAt DESC")
-					->getResult();
+	    foreach ($ids as $key => $id){
+	        if($key == 0){
+	            $list = "'".$id."'";
+	        }else{
+	            $list .= ",'".$id."'";
+	        }
+	    }
+	    
+	    return $this->createQueryBuilder('f')
+	                ->select()
+	                ->distinct()
+	                ->where('f.id IN ('.$list.')')
+	                ->orderBy('f.createdAt', 'DESC')
+	                ->getQuery()
+	                ->getResult();
 	}
 	
 	/**
@@ -84,7 +76,6 @@ class FileRepository extends PuzzleRepository
 		}
 		return $this->_em
 					->createQuery("SELECT f FROM ". $this->_entityName . " f WHERE f.id NOT IN (".$list.")")
-// 					->setParameter(':list', $list)
 					->getResult();
 	}
 	
@@ -108,5 +99,20 @@ class FileRepository extends PuzzleRepository
 		->createQuery("SELECT f FROM ". $this->_entityName . " f WHERE f.path IN (".$listPaths.")")
 // 					->setParameter('listPaths',$listPaths)
 					->getResult();
+	}
+	
+	public function constructInClause($data, $delimiter = ',') {
+	    $data = !is_array($data) ? explode($delimiter, $data) : $data;
+	    $list = "";
+	    
+	    foreach ($data as $key => $item){
+	        if($key == 0){
+	            $list = "'".$item."'";
+	        }else{
+	            $list .= ",'".$item."'";
+	        }
+	    }
+	    
+	    return $list;
 	}
 }

@@ -1,0 +1,89 @@
+{% trans_default_domain 'media' %}
+
+<div class="uk-modal-dialog">
+    <div class="uk-modal-body uk-margin-top">
+        <div class="uk-width-1-1">
+        	{{ form_start(form) }}
+                {% if type == 'video' %}
+                	<div class="uk-form-row">
+                    	{{ form_label(form.duration, 'media.video.form.duration'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                    	{{ form_widget(form.duration, {'value': file.duration, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                    <div class="uk-form-row">
+                    	{{ form_label(form.country, 'media.video.form.country'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                    	{{ form_widget(form.country, {'value': file.country, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                    <div class="uk-form-row">
+                    	{{ form_label(form.actors, 'media.video.form.actors'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                    	{% if file.actors is not empty %}
+                            {{ form_widget(form.actors, {'attr': {'data-role' : 'materialtags'}, 'value': file.actors}) }}
+                        {% else %}
+                            {{ form_widget(form.actors, {'attr': {'data-role' : 'materialtags'}}) }}
+                        {% endif %}
+                    </div>
+                    <div class="uk-form-row">
+                    	{{ form_label(form.authors, 'media.video.form.authors'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                    	{% if file.authors is not empty %}
+                            {{ form_widget(form.authors, {'attr': {'data-role' : 'materialtags'}, 'value': file.authors}) }}
+                        {% else %}
+                            {{ form_widget(form.authors, {'attr': {'data-role' : 'materialtags'}}) }}
+                        {% endif %}
+                    </div>
+                {% elseif type == 'audio' %}
+                    <div class="uk-form-row">
+                        {{ form_label(form.author, 'media.audio.form.author'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                        {{ form_widget(form.author, {'value': file.author, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                    <div class="uk-form-row">
+                        {{ form_label(form.album, 'media.audio.form.album'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                        {{ form_widget(form.album, {'value': file.album, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                    <div class="uk-form-row">
+                        {{ form_label(form.artists, 'media.audio.form.artists'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                        {% if file.artists is not empty %}
+                            {{ form_widget(form.artists, {'attr': {'data-role' : 'materialtags'}, 'value': file.artists}) }}
+                        {% else %}
+                            {{ form_widget(form.artists, {'attr': {'data-role' : 'materialtags'}}) }}
+                        {% endif %}
+                    </div>
+                    <div class="uk-form-row">
+                        {{ form_label(form.compositor, 'media.audio.form.compositor'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                        {{ form_widget(form.compositor, {'value': file.compositor, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                    <div class="uk-form-row">
+                        {{ form_label(form.gender, 'media.audio.form.gender'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                        {{ form_widget(form.gender, {'value': file.gender, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                    <div class="uk-form-row">
+                        {{ form_label(form.year, 'media.audio.form.year'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                        {{ form_widget(form.year, {'value': file.year, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                    <div class="uk-form-row">
+                        {{ form_label(form.trackNumber, 'media.audio.form.track_number'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                        {{ form_widget(form.trackNumber, {'value': file.trackNumber, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                    <div class="uk-form-row">
+                        {{ form_label(form.trackTotal, 'media.audio.form.track_total'|trans, {'attr': {'class': 'uk-form-label'}}) }}
+                        {{ form_widget(form.trackTotal, {'value': file.trackTotal, 'attr': {'class': 'md-input'}}) }}
+                    </div>
+                {% endif %}
+                <input type="hidden" name="redirect_url" value="{{ redirectUrl }}">
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">{{ 'media.file.form.cancel'|trans }}</button>
+                    <button type="submit" class="md-btn md-btn-success">{{ 'media.file.form.update'|trans }}</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+{% javascripts
+    'bundles/admin/js/common.js'
+    'bundles/admin/js/uikit_custom.js'
+    'bundles/admin/libs/jquery-typeahead/dist/jquery.typeahead.min.js'
+    'bundles/admin/libs/materialize-tags/dist/js/materialize-tags.min.js'
+    'bundles/media/js/admin.js'
+    output="compiled/js/puzzle_admin_media_file_update_metadata.min.js" 
+%}
+    <script src="{{ asset_url }}"></script>
+{% endjavascripts %}
