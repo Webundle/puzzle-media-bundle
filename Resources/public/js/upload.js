@@ -3,9 +3,41 @@
 // });
 
 var altair_form_file_upload = {
+    preview: function () {
+        var type = $("#file_type").val(),
+            suffix = '_' + type,
+        	$target_container = $("#target_container" + suffix),
+        	$target_element = $("#target" + suffix),
+        	$files_to_add = $("#files_to_add" + suffix),
+        	data = $files_to_add.val()
+        ;
+
+        console.log(data);
+        if (data.trim != "" && data.trim != null) {
+            var array = data.split(',');
+            for (var i = 0; i < array.length; i++) {
+                switch (type) {
+                    case 'picture':
+                        var tpl = '<img src="' + array[i] +'" id="item_' + i + '_old" class="preview">';
+                        break;
+                    case 'audio':
+                        var tpl = '<audio src="' + array[i] +'" controls id="item_' + i + '_old" class="preview"></audio>';
+                        break;
+                    case 'video':
+                        var tpl = '<video src="' +  array[i] +'" controls id="item_' + i + '_old" class="preview"></video>';
+                        break;
+                    default:
+                        var tpl = '<embed src="' +  array[i] +'" controls id="item_' + i + '_old" class="preview"></embed>';
+                        break;
+                }
+            }
+            $target_container.html(tpl);
+            $target_container.removeClass('uk-hidden');
+        }
+    },
     init: function(suffix) {
         suffix = suffix != "" ? '_' + suffix : '_' + $("#file_type").val();
-       
+
         var $file_upload_context = $("#file_upload_context" + suffix),
         	$file_upload_select = $("#file_upload_select" + suffix),
         	$file_upload_drop = $("#file_upload_drop" + suffix),
@@ -19,7 +51,7 @@ var altair_form_file_upload = {
 
         var $bar         = $('#progress_bar' + suffix),
             settings    = {
-                action: url, 
+                action: url,
                 allow : $file_filters.val(),
                 loadstart: function() {
                     $bar.css("width", "0%").text("0%");
@@ -35,7 +67,7 @@ var altair_form_file_upload = {
 
                     switch (obj.type) {
                         case 'picture':
-                            var tpl = '<img src="' + obj.url +'" id="item_' + obj.id + '" class="preview">'; 
+                            var tpl = '<img src="' + obj.url +'" id="item_' + obj.id + '" class="preview">';
                             break;
                         case 'audio':
                             var tpl = '<audio src="' + obj.url +'" controls id="item_' + obj.id + '" class="preview"></audio>';
@@ -69,7 +101,7 @@ var altair_form_file_upload = {
 
                     // Save picture value
                     $files_to_add.val(data);
-                    
+
                     // Show picture
                     var obj = JSON.parse(response);
                     var urls = obj.url.split(',');
@@ -107,11 +139,11 @@ var altair_form_file_upload = {
             'type': type,
             'target': 'modal'
         });
-        
+
         url = selection_type == "multiple-select" ? url + "&multiple_select=1" : url;
-        
+
         $("#choose_file_modal_dialog_" + type).html('<div class="uk-text-center"><div class="md-preloader"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="96" width="96" viewBox="0 0 75 75"><circle cx="37.5" cy="37.5" r="33.5" stroke-width="4"></circle></svg></div></div>');
-        
+
         $.ajax({
             url: url,
             async: false, // Synchrone mode
@@ -127,7 +159,7 @@ var altair_form_file_upload = {
         }else {
              suffix = '_' + $("#file_type").val();
         }
-        
+
         var target_container = $("#target_container" + suffix),
             target_element = $("#target" + suffix),
             files_to_add = $("#files_to_add" + suffix),
@@ -156,23 +188,23 @@ var altair_form_file_upload = {
             }else{
                 UIkit.modal("#choose_files_modal" + suffix).hide();
             }
-        } 
+        }
     }
 };
 
 // Load media
 $(".load_media").click(function(){
     var type = $(this).data('type');
-    
+
     $("#fromMedia_" + type).html('<div class="uk-text-center"><div class="md-preloader"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="96" width="96" viewBox="0 0 75 75"><circle cx="37.5" cy="37.5" r="33.5" stroke-width="4"></circle></svg></div></div>');
 
     var url = Routing.generate('puzzle_admin_media_file_browse', {
-        'type': type, 
-        'context': $("#file_upload_context_" + type).val(), 
-        'multiple_select': $("#enable_mutiple_select_" + type).val(), 
+        'type': type,
+        'context': $("#file_upload_context_" + type).val(),
+        'multiple_select': $("#enable_mutiple_select_" + type).val(),
         'target': 'modal'
     });
-    
+
     $.get(url, function(response) {
         $('#fromMedia_' + type).html(response);
     });

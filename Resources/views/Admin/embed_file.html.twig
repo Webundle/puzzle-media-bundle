@@ -1,5 +1,5 @@
 {% trans_default_domain 'media' %}
-    
+
 <div class="md-card uk-margin-bottom" id="local-{{ type }}">
     <div class="md-card-toolbar">
         <div class="md-card-toolbar-actions">
@@ -11,33 +11,8 @@
             {{ form_label(formData) }}
         </h3>
     </div>
-    <div class="md-card-content uk-text-center {% if data is empty or multiple == true %}uk-hidden{% endif %}" id="target_container_{{ type }}">
-        {# {% if data is not empty %}
-            {% set end = multiple == false ? data|split(',') : data %}
-            {% for item in data %}
-                {% set file = puzzle_media_file(item) %}
-                {% if file is not empty %}
-                    {% if file.picture is not empty %}
-                        <img src="{{ file.path }}" id="item_{{ file.id }}"> 
-                    {% elseif file.audio is not empty %}
-                        <audio src="{{ file.path }}" controls id="item_{{ file.id }}" style="width:100%"></audio>
-                    {% elseif file.video is not empty %}
-                        <video src="{{ file.path }}" style="width:100%" controls id="item_{{ file.id }}"></video>
-                    {% else %}
-                        <embed src="{{ file.path }}" width="100%" controls id="item_{{ file.id }}" /></embed>
-                    {% endif %}
-                {% endif %}
-            {% endfor %} #}
-        	
-        	{# <embed src="{{ file != null ? file.path : "" }}" class="img_large" id="target_{{ type }}" alt="{{ file.name }}"></embed>
-        {# {% else %}
-        	<embed src="" class="img_large" id="target_{{ type }}"></embed> #}
-        {# {% endif %}  #}
-        <div class="uk-hidden" id="item_count_container_{{ type }}">
-            <span id="item_count_{{ type }}"></span> {{ 'media.file.embed.selected'|trans }}
-        </div>
-    </div>
-    {{ form_widget(formData, {'id': 'files_to_add_'~type}) }}
+    <div class="md-card-content uk-text-center uk-hidden" id="target_container_{{ type }}"></div>
+    {{ form_widget(formData, {'id': 'files_to_add_'~type, 'value': data}) }}
 </div>
 {% if alternate is defined and alternate == true %}
 <div class="md-card alternate-{{ type }} uk-hidden">
@@ -69,7 +44,7 @@
                         <li class="uk-active"><a href="#">{{ 'media.file.embed.from_computer'|trans }}</a></li>
                         <li><a href="#" class="load_media" data-type="{{ type }}">{{ 'media.file.embed.from_media'|trans }}</a></li>
                     </ul>
-                    
+
                     <ul id="tabs_1_{{ type }}" class="uk-switcher uk-margin">
                         <li id="fromLocal_{{ type }}">
                             <div class="uk-width-large-1-1">
@@ -94,4 +69,3 @@
         </div>
     </div>
 </div>
-
