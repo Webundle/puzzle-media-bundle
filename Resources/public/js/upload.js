@@ -7,32 +7,38 @@ var altair_form_file_upload = {
         var type = $("#file_type").val(),
             suffix = '_' + type,
         	$target_container = $("#target_container" + suffix),
-        	$target_element = $("#target" + suffix),
         	$files_to_add = $("#files_to_add" + suffix),
         	data = $files_to_add.val()
         ;
 
-        console.log(data);
         if (data.trim != "" && data.trim != null) {
             var array = data.split(',');
+            var tpl = "";
             for (var i = 0; i < array.length; i++) {
-                switch (type) {
-                    case 'picture':
-                        var tpl = '<img src="' + array[i] +'" id="item_' + i + '_old" class="preview">';
-                        break;
-                    case 'audio':
-                        var tpl = '<audio src="' + array[i] +'" controls id="item_' + i + '_old" class="preview"></audio>';
-                        break;
-                    case 'video':
-                        var tpl = '<video src="' +  array[i] +'" controls id="item_' + i + '_old" class="preview"></video>';
-                        break;
-                    default:
-                        var tpl = '<embed src="' +  array[i] +'" controls id="item_' + i + '_old" class="preview"></embed>';
-                        break;
+                if (array[i] != '') {
+                    switch (type) {
+                        case 'picture':
+                            tpl += '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + array[i] + '"></button><img src="' + array[i] +'" id="item_' + i + '_old" width="100%"></div>';
+                            break;
+                        case 'audio':
+                            tpl += '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + array[i] + '"></button><audio src="' + array[i] +'" controls id="item_' + i + '_old" width="100%"></audio></div>';
+                            break;
+                        case 'video':
+                            tpl += '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + array[i] + '"></button><video src="' +  array[i] +'" controls id="item_' + i + '_old" width="100%"></video></div>';
+                            break;
+                        default:
+                            tpl += '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + array[i] + '"></button><embed src="' +  array[i] +'" controls id="item_' + i + '_old" width="100%"></embed></div>';
+                            break;
+                    }
                 }
             }
             $target_container.html(tpl);
             $target_container.removeClass('uk-hidden');
+
+            var width = 100 / parseInt(data.split(',').length);
+            $target_container.find('.preview')
+                             .css('width', width + '%')
+                             .css('display', 'inline-block');
         }
     },
     init: function(suffix) {
@@ -67,16 +73,16 @@ var altair_form_file_upload = {
 
                     switch (obj.type) {
                         case 'picture':
-                            var tpl = '<img src="' + obj.url +'" id="item_' + obj.id + '" class="preview">';
+                            var tpl = '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + obj.id + '"></button><img src="' + obj.url +'" id="item_' + obj.id + '" width="100%"></div>';
                             break;
                         case 'audio':
-                            var tpl = '<audio src="' + obj.url +'" controls id="item_' + obj.id + '" class="preview"></audio>';
+                            var tpl = '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + obj.id + '"></button><audio src="' + obj.url +'" id="item_' + obj.id + '" controls width="100%"></audio></div>';
                             break;
                         case 'video':
-                            var tpl = '<video src="' + obj.url +'" controls id="item_' + obj.id + '" class="preview"></video>';
+                            var tpl = '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + obj.id + '"></button><video src="' + obj.url +'" id="item_' + obj.id + '" controls width="100%"></video></div>';
                             break;
                         default:
-                            var tpl = '<embed src="' + obj.url +'" controls id="item_' + obj.id + '" class="preview"></embed>';
+                            var tpl = '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + obj.id + '"></button><embed src="' + obj.url +'" id="item_' + obj.id + '" controls width="100%"></embed></div>';
                             break;
                     }
 
@@ -118,7 +124,9 @@ var altair_form_file_upload = {
                     // $('#item_count_container' + suffix).removeClass('uk-hidden');
                     // $('#item_count' + suffix).html(urls.length);
                     var width = 100 / parseInt(data.split(',').length);
-                    $target_container.find('.preview').css('width', width + '%');
+                    $target_container.find('.preview')
+                                     .css('width', width + '%')
+                                     .css('display', 'inline-block');
 
                     // Hide modal
                     UIkit.modal("#choose_files_modal" + suffix).hide();
@@ -154,22 +162,17 @@ var altair_form_file_upload = {
     },
     select_files_from_media: function(suffix = "", source = "") {
 
-        if (suffix != "") {
-            suffix = '_' + suffix;
-        }else {
-             suffix = '_' + $("#file_type").val();
-        }
-
-        var target_container = $("#target_container" + suffix),
-            target_element = $("#target" + suffix),
-            files_to_add = $("#files_to_add" + suffix),
+        var type = $("#file_type").val(),
+            suffix = suffix != "" ? '_' + suffix : '_' + $("#file_type").val(),
+            $target_container = $("#target_container" + suffix),
+            $files_to_add = $("#files_to_add" + suffix),
             paths = [];
 
         if (source != "") {
             paths.push(source);
         }else {
-            if (files_to_add.val() != "") {
-                paths.push(files_to_add.val().split(","));
+            if ($files_to_add.val() != "") {
+                paths.push($files_to_add.val().split(","));
             }
 
             $("div.icheckbox_md.checked > input").each(function() {
@@ -178,16 +181,41 @@ var altair_form_file_upload = {
             });
         }
 
-        if (paths[0] != "#") {
-            target_element.attr('src',paths[0]);
-            target_container.removeClass('uk-hidden');
-            files_to_add.val(paths.join(","));
-
-            if($("#refresh-auto").val() == 1){
-                window.location.assign($("#refresh-url").val());
-            }else{
-                UIkit.modal("#choose_files_modal" + suffix).hide();
+        if (paths.length > 0) {
+            var array = paths;
+            var tpl = "";
+            for (var i = 0; i < array.length; i++) {
+                if (array[i] != '') {
+                    switch (type) {
+                        case 'picture':
+                            tpl += '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + array[i] + '"></button><img src="' + array[i] +'" id="item_' + i + '_old" width="100%"></div>';
+                            break;
+                        case 'audio':
+                            tpl += '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + array[i] + '"></button><audio src="' + array[i] +'" controls id="item_' + i + '_old" width="100%"></audio></div>';
+                            break;
+                        case 'video':
+                            tpl += '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + array[i] + '"></button><video src="' +  array[i] +'" controls id="item_' + i + '_old" width="100%"></video></div>';
+                            break;
+                        default:
+                            tpl += '<div class="preview uk-position-relative"><button type="button" class="uk-modal-close uk-close uk-close-alt uk-position-absolute" data-target="' + array[i] + '"></button><embed src="' +  array[i] +'" controls id="item_' + i + '_old" width="100%"></embed></div>';
+                            break;
+                    }
+                }
             }
+            $target_container.html(tpl);
+            $target_container.removeClass('uk-hidden');
+            $files_to_add.val(paths.join(","));
+
+            var width = 100 / parseInt(paths.length);
+            $target_container.find('.preview')
+                             .css('width', width + '%')
+                             .css('display', 'inline-block');
+
+             if ($("#refresh-auto").val() == 1){
+                 window.location.assign($("#refresh-url").val());
+             }else {
+                 UIkit.modal("#choose_files_modal" + suffix).hide();
+             }
         }
     }
 };
@@ -208,4 +236,34 @@ $(".load_media").click(function(){
     $.get(url, function(response) {
         $('#fromMedia_' + type).html(response);
     });
+});
+
+$('body').on('click', '.uk-modal-close', function(e){
+    e.preventDefault();
+    var suffix = '_' + $("#file_type").val(),
+        $files_to_add = $("#files_to_add" + suffix),
+        $target_container = $("#target_container" + suffix),
+        data = $files_to_add.val()
+    ;
+
+    var array = data != '' ? data.split(',') : [];
+    data = [];
+    for (var i = 0; i < array.length; i++) {
+        if ($(this).data('target') != array[i]) {
+            data.push(array[i]);
+        }
+    }
+
+    if (data.length == 0) {
+        $target_container.addClass('uk-hidden');
+    }
+
+    // Update file to add
+    $files_to_add.val(data.join(','));
+    // Remove preview container
+    $(this).closest('.preview').remove();
+    var width = 100 / parseInt(data.length);
+    // Resize image
+    $target_container.find('.preview')
+                     .css('width', width + '%');
 });
